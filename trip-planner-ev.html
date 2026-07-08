@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trip Planner EV — Know your charger works, and what it costs, before you drive</title>
+<meta name="description" content="Trip Planner EV grades every charger A–F from real session outcomes, prices every stop for your exact car, and pre-plans your backup — EV road trips without charge anxiety." />
+<meta name="keywords" content="EV trip planner, EV route planner, electric vehicle trip planner, EV charging stations, charger reliability, EV charging cost, electric car range, EV road trip" />
+<link rel="canonical" href="https://tripplannerev.com/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Trip Planner EV" />
+<meta property="og:title" content="Trip Planner EV — the trust layer for EV road trips" />
+<meta property="og:description" content="Every charger graded A–F. Every stop priced for your exact car. A backup pre-planned. Charge anxiety doesn't ride along." />
+<meta property="og:url" content="https://tripplannerev.com/" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#0E5E44" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Overpass:wght@600;700;800;900&family=Overpass+Mono:wght@400;600;700&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+
+<!-- ASTRO PORT NOTE: this single file splits cleanly into src/pages/index.astro +
+     components/{Nav,Hero,Stats,Features,Demo,Methodology,Compare,Pricing,Faq,Cta,Footer}.astro.
+     All CSS below becomes src/styles/global.css; tokens are already namespaced in :root. -->
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Trip Planner EV",
+  "applicationCategory": "TravelApplication",
+  "operatingSystem": "Web",
+  "description": "EV trip planner that grades charger reliability A–F, calculates true charging cost per stop for your exact vehicle, and pre-plans backup chargers.",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question", "name": "How are charger reliability grades calculated?", "acceptedAnswer": {"@type": "Answer", "text": "Grades come from real session outcomes: recent successful and failed charges, weighted by recency, computed per stall — with the full formula published. Operators cannot pay to change a grade."}},
+    {"@type": "Question", "name": "Is Trip Planner EV accurate without an OBD dongle?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The planner uses a physics-based energy model (speed, elevation, temperature, wind, payload) plus vehicle telematics where your car supports it — no hardware required."}},
+    {"@type": "Question", "name": "Is it free?", "acceptedAnswer": {"@type": "Answer", "text": "Planning, grades, and cost estimates are free. Premium adds the in-car experience, live re-routing, and price alerts."}}
+  ]
+}
+</script>
+
+<style>
+/* ============================================================
+   TRIP PLANNER EV — design system
+   Direction: US highway guide-signage. Interstate green panels,
+   retroreflective white borders, Overpass (Highway Gothic
+   lineage) display, Public Sans body, Overpass Mono telemetry.
+   ============================================================ */
+:root{
+  /* palette */
+  --green-950:#07301F;
+  --green-900:#0A3D2C;
+  --green:#0E5E44;          /* guide-sign green */
+  --green-550:#137355;
+  --green-100:#E2EFE7;
+  --paper:#F4F6F2;          /* daylight neutral (cool, not cream) */
+  --card:#FFFFFF;
+  --ink:#152119;
+  --muted:#5A6A60;
+  --line:#DBE3DC;
+  --reflect:#FFFFFF;        /* retroreflective border */
+  --amber:#EFA51C;          /* warning signage */
+  --marker:#E4572E;         /* "you are here" */
+  --grade-a:#1D9A6C;
+  --grade-b:#7FB53C;
+  --grade-c:#EFA51C;
+  --grade-d:#E4572E;
+  /* type */
+  --display:'Overpass',system-ui,sans-serif;
+  --body:'Public Sans',system-ui,sans-serif;
+  --mono:'Overpass Mono',ui-monospace,monospace;
+  /* rhythm */
+  --rail:64px;              /* left route-spine gutter on desktop */
+  --max:1180px;
+  --r-sign:16px;
+  --r-ui:10px;
+  --shadow-sign:0 14px 34px rgba(10,61,44,.22);
+  --shadow-card:0 6px 22px rgba(21,33,25,.07);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--body);
+  color:var(--ink);
+  background:var(--paper);
+  line-height:1.6;
+  font-size:16.5px;
+  -webkit-font-smoothing:antialiased;
+}
+img,svg{display:block;max-width:100%}
+a{color:inherit}
+::selection{background:var(--green);color:#fff}
+:focus-visible{outline:3px solid var(--amber);outline-offset:2px;border-radius:4px}
+
+/* ---------- type scale ---------- */
+h1,h2,h3{font-family:var(--display);line-height:1.06;letter-spacing:-.015em}
+h1{font-size:clamp(2.7rem,5.6vw,4.5rem);font-weight:900}
+h2{font-size:clamp(1.9rem,3.4vw,2.7rem);font-weight:800}
+h3{font-size:1.22rem;font-weight:800;line-height:1.25}
+.lede{font-size:clamp(1.05rem,1.6vw,1.25rem);color:var(--muted);max-width:56ch}
+.eyebrow{
+  font-family:var(--mono);font-size:.72rem;font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--green);
+  display:flex;align-items:center;gap:.6rem;
+}
+.eyebrow::before{content:"";width:26px;height:3px;background:var(--green);border-radius:2px}
+.on-green .eyebrow{color:#BFE3CF}
+.on-green .eyebrow::before{background:var(--amber)}
+.mono{font-family:var(--mono)}
+
+/* ---------- layout: mile sections + route spine ---------- */
+.wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
+.mile{position:relative;padding:104px 0}
+.mile--tight{padding:72px 0}
+.mile--green{background:var(--green);color:#EDF6F0}
+.mile--green .lede{color:#C7DDD0}
+.mile--deep{background:var(--green-950);color:#EAF4EE}
+.mile-head{max-width:760px;margin-bottom:56px;display:grid;gap:14px}
+
+/* the route spine (signature): desktop-only left rail */
+#spine{position:fixed;left:max(12px,calc((100vw - var(--max))/2 - var(--rail)));top:0;bottom:0;width:2px;z-index:5;pointer-events:none;
+  background:repeating-linear-gradient(to bottom,var(--line) 0 14px,transparent 14px 26px)}
+#spine-dot{position:fixed;left:max(12px,calc((100vw - var(--max))/2 - var(--rail)));top:20vh;width:14px;height:14px;margin-left:-6px;border-radius:50%;
+  background:var(--marker);box-shadow:0 0 0 5px rgba(228,87,46,.18);z-index:6;pointer-events:none;transition:top .15s linear}
+.milemark{position:absolute;left:calc(-1*var(--rail) - 5px);top:112px;transform:rotate(180deg);writing-mode:vertical-rl;
+  font-family:var(--mono);font-size:.66rem;font-weight:700;letter-spacing:.22em;color:#9FB1A6;text-transform:uppercase}
+@media (max-width:1330px){#spine,#spine-dot,.milemark{display:none}}
+
+/* ---------- nav ---------- */
+header{position:fixed;inset:0 0 auto 0;z-index:50;transition:background .25s,box-shadow .25s,border-color .25s;border-bottom:1px solid transparent}
+header.scrolled{background:rgba(244,246,242,.9);backdrop-filter:blur(10px);border-color:var(--line);box-shadow:0 2px 14px rgba(21,33,25,.05)}
+.nav{display:flex;align-items:center;gap:28px;height:72px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--display);font-weight:900;font-size:1.14rem;letter-spacing:-.01em}
+.brand b{color:var(--green)}
+.brand .shield{width:32px;height:34px;flex:0 0 auto}
+.nav-links{display:flex;gap:26px;margin-left:auto;font-weight:600;font-size:.93rem}
+.nav-links a{text-decoration:none;color:var(--muted)}
+.nav-links a:hover{color:var(--ink)}
+@media (max-width:820px){.nav-links{display:none}}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.55rem;font-family:var(--display);font-weight:800;font-size:.98rem;
+  padding:.86rem 1.5rem;border-radius:var(--r-ui);text-decoration:none;border:2px solid transparent;cursor:pointer;transition:transform .12s,box-shadow .12s,background .12s;letter-spacing:.005em}
+.btn:active{transform:translateY(1px)}
+.btn-green{background:var(--green);color:#fff;box-shadow:0 6px 18px rgba(14,94,68,.28)}
+.btn-green:hover{background:var(--green-550)}
+.btn-ghost{background:transparent;color:var(--green);border-color:var(--green)}
+.btn-ghost:hover{background:var(--green-100)}
+.btn-reflect{background:#fff;color:var(--green-900)}
+.btn-reflect:hover{box-shadow:0 8px 22px rgba(0,0,0,.22)}
+.btn-sm{padding:.55rem 1rem;font-size:.86rem}
+
+/* ---------- guide-sign panel (signature component) ---------- */
+.sign{background:var(--green);color:#fff;border-radius:var(--r-sign);
+  box-shadow:inset 0 0 0 3px var(--reflect),inset 0 0 0 5px var(--green),var(--shadow-sign);
+  padding:26px 26px 22px;position:relative}
+.sign--amber{background:#B77708;box-shadow:inset 0 0 0 3px var(--reflect),inset 0 0 0 5px #B77708,var(--shadow-sign)}
+.sign .sign-route{font-family:var(--display);font-weight:900;font-size:1.35rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.sign small{display:block;font-family:var(--mono);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:#BFE3CF;margin-bottom:6px}
+.exit-tab{position:absolute;top:-15px;right:24px;background:var(--green);color:#fff;border-radius:8px;
+  box-shadow:inset 0 0 0 2px var(--reflect);font-family:var(--display);font-weight:800;font-size:.78rem;padding:.32rem .8rem;letter-spacing:.04em}
+
+/* stops list inside sign */
+.stop{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px 0;border-top:1px dashed rgba(255,255,255,.28)}
+.stop-name{font-weight:700;font-family:var(--display);font-size:.98rem}
+.stop-meta{font-family:var(--mono);font-size:.72rem;color:#BFE3CF}
+.grade{width:38px;height:38px;border-radius:9px;display:grid;place-items:center;font-family:var(--display);font-weight:900;font-size:1.05rem;color:#08331F;box-shadow:inset 0 0 0 2px rgba(255,255,255,.85)}
+.grade.a{background:var(--grade-a);color:#fff}
+.grade.b{background:var(--grade-b);color:#233A0C}
+.grade.c{background:var(--grade-c);color:#4A3202}
+.grade.d{background:var(--grade-d);color:#fff}
+.stop-cost{font-family:var(--mono);font-weight:700;font-size:.95rem;text-align:right}
+.planb{margin-top:10px;padding:9px 12px;border-radius:9px;background:rgba(255,255,255,.1);border:1px dashed rgba(255,255,255,.4);
+  font-family:var(--mono);font-size:.74rem;color:#DFF0E6;display:flex;gap:.5rem;align-items:center}
+.sign-readout{display:flex;gap:22px;margin-top:16px;padding-top:14px;border-top:3px double rgba(255,255,255,.5);flex-wrap:wrap}
+.readout b{display:block;font-family:var(--mono);font-weight:700;font-size:1.28rem}
+.readout span{font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:#BFE3CF}
+
+/* confidence ring */
+.ring{--p:94;width:76px;height:76px;border-radius:50%;
+  background:conic-gradient(var(--amber) calc(var(--p)*1%),rgba(255,255,255,.18) 0);
+  display:grid;place-items:center;margin-left:auto}
+.ring i{width:58px;height:58px;border-radius:50%;background:var(--green);display:grid;place-items:center;
+  font-family:var(--mono);font-weight:700;font-style:normal;font-size:.95rem}
+.demo-stamp{position:absolute;bottom:14px;right:18px;font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;color:rgba(255,255,255,.55);text-transform:uppercase}
+
+/* ---------- hero ---------- */
+#hero{padding:168px 0 96px;position:relative;overflow:hidden}
+#hero .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
+@media (max-width:980px){#hero .wrap{grid-template-columns:1fr}}
+.hero-copy{display:grid;gap:22px}
+.hero-copy h1 em{font-style:normal;color:var(--green);position:relative;white-space:nowrap}
+.hero-copy h1 em::after{content:"";position:absolute;left:0;right:0;bottom:.06em;height:.14em;background:var(--amber);border-radius:3px;opacity:.85}
+.hero-ctas{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px}
+.hero-foot{font-family:var(--mono);font-size:.74rem;color:var(--muted);letter-spacing:.02em}
+.hero-foot b{color:var(--green)}
+/* faint dashed road across hero background */
+#hero::before{content:"";position:absolute;left:-5%;right:-5%;top:58%;height:3px;
+  background:repeating-linear-gradient(to right,var(--line) 0 26px,transparent 26px 48px);opacity:.7;z-index:-1}
+
+/* ---------- stat tiles ---------- */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media (max-width:980px){.stats{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.stats{grid-template-columns:1fr}}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:var(--shadow-card)}
+.stat b{font-family:var(--mono);font-weight:700;font-size:2.1rem;color:var(--green);display:block;line-height:1}
+.stat p{font-size:.9rem;color:var(--muted);margin-top:8px}
+.stat cite{display:block;font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:#9FB1A6;margin-top:10px;font-style:normal}
+
+/* ---------- feature cards ---------- */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media (max-width:980px){.features{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:640px){.features{grid-template-columns:1fr}}
+.feature{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px;box-shadow:var(--shadow-card);display:grid;gap:12px;align-content:start;transition:transform .18s,box-shadow .18s}
+.feature:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(21,33,25,.11)}
+.feature .glyph{width:46px;height:46px;border-radius:11px;background:var(--green-100);display:grid;place-items:center;color:var(--green)}
+.feature p{font-size:.95rem;color:var(--muted)}
+.feature .chiprow{display:flex;gap:6px;margin-top:2px}
+.chip{font-family:var(--mono);font-size:.68rem;font-weight:700;padding:.22rem .55rem;border-radius:6px;background:var(--green-100);color:var(--green-900)}
+
+/* ---------- how it works: exit signs ---------- */
+.exits{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media (max-width:900px){.exits{grid-template-columns:1fr}}
+.exit{position:relative;background:var(--green);color:#fff;border-radius:var(--r-sign);
+  box-shadow:inset 0 0 0 3px var(--reflect),inset 0 0 0 5px var(--green),var(--shadow-sign);padding:34px 24px 24px;display:grid;gap:10px}
+.exit .tab{position:absolute;top:-15px;left:22px;background:var(--green);border-radius:8px;box-shadow:inset 0 0 0 2px var(--reflect);
+  font-family:var(--display);font-weight:800;font-size:.78rem;padding:.32rem .8rem}
+.exit h3{color:#fff}
+.exit p{font-size:.93rem;color:#CFE4D8}
+
+/* ---------- demo widget ---------- */
+.demo-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:32px;align-items:start}
+@media (max-width:980px){.demo-grid{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px;box-shadow:var(--shadow-card);display:grid;gap:16px}
+.field{display:grid;gap:6px}
+.field label{font-family:var(--mono);font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.field select{appearance:none;font:600 .96rem var(--body);color:var(--ink);background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%230E5E44' stroke-width='2' fill='none'/%3E%3C/svg%3E") no-repeat right 14px center;
+  border:1.5px solid var(--line);border-radius:var(--r-ui);padding:.75rem 2.4rem .75rem .9rem;cursor:pointer}
+.field select:hover{border-color:var(--green)}
+.band{margin-top:6px}
+.band-track{height:10px;border-radius:6px;background:linear-gradient(90deg,var(--grade-a),var(--grade-b) 45%,var(--grade-c) 75%,var(--grade-d));position:relative;opacity:.9}
+.band-lo,.band-hi{position:absolute;top:-4px;width:3px;height:18px;background:var(--ink);border-radius:2px}
+.band-labels{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.68rem;color:var(--muted);margin-top:6px}
+
+/* ---------- methodology (green mile) ---------- */
+.formula{background:var(--green-950);border-radius:14px;padding:22px 24px;font-family:var(--mono);font-size:.92rem;color:#CBE8D8;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);overflow-x:auto;white-space:pre;line-height:1.7}
+.formula b{color:var(--amber);font-weight:700}
+.pledges{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:26px}
+@media (max-width:760px){.pledges{grid-template-columns:1fr}}
+.pledge{display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:16px}
+.pledge svg{flex:0 0 auto;margin-top:2px}
+.pledge p{font-size:.92rem;color:#CFE4D8}
+.pledge b{color:#fff;display:block;font-family:var(--display);font-size:1rem}
+
+/* ---------- comparison table ---------- */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:16px;background:var(--card);box-shadow:var(--shadow-card)}
+table{width:100%;border-collapse:collapse;min-width:760px;font-size:.92rem}
+th,td{padding:14px 16px;text-align:center;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left;font-weight:600}
+thead th{font-family:var(--display);font-weight:800;font-size:.9rem}
+thead th.us{background:var(--green);color:#fff;border-radius:12px 12px 0 0}
+tbody td.us{background:var(--green-100)}
+tbody tr:last-child td{border-bottom:none}
+.yes{color:var(--grade-a);font-weight:700}
+.no{color:#B9C4BC}
+.part{color:var(--amber);font-weight:700}
+.tfoot{font-family:var(--mono);font-size:.68rem;color:var(--muted);margin-top:12px}
+
+/* ---------- pricing ---------- */
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch}
+@media (max-width:980px){.plans{grid-template-columns:1fr}}
+.plan{background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:30px 26px;display:grid;gap:16px;align-content:start;position:relative}
+.plan.hot{border-color:var(--green);box-shadow:var(--shadow-sign)}
+.plan .badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--amber);color:#3A2800;font-family:var(--display);font-weight:800;font-size:.72rem;letter-spacing:.06em;padding:.3rem .8rem;border-radius:99px}
+.price{font-family:var(--mono);font-weight:700;font-size:2.2rem;line-height:1}
+.price span{font-size:.85rem;color:var(--muted);font-weight:400}
+.plan ul{list-style:none;display:grid;gap:9px;font-size:.93rem}
+.plan li{display:flex;gap:9px;align-items:flex-start;color:var(--muted)}
+.plan li::before{content:"";width:16px;height:16px;flex:0 0 auto;margin-top:3px;border-radius:5px;background:var(--green-100) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M4 8.5l2.6 2.6L12 5.5' stroke='%230E5E44' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") center/12px no-repeat}
+
+/* ---------- FAQ ---------- */
+.faq{max-width:820px;display:grid;gap:12px}
+details{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:0 22px;box-shadow:var(--shadow-card)}
+details[open]{border-color:var(--green)}
+summary{cursor:pointer;list-style:none;padding:20px 0;font-family:var(--display);font-weight:800;font-size:1.02rem;display:flex;justify-content:space-between;gap:16px;align-items:center}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-family:var(--mono);font-size:1.3rem;color:var(--green);transition:transform .2s}
+details[open] summary::after{transform:rotate(45deg)}
+details p{padding:0 0 20px;color:var(--muted);font-size:.95rem;max-width:64ch}
+
+/* ---------- final CTA ---------- */
+.cta-sign{max-width:720px;margin:0 auto;text-align:left}
+.waitlist{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.waitlist input{flex:1;min-width:230px;font:500 .98rem var(--body);padding:.85rem 1rem;border-radius:var(--r-ui);border:2px solid rgba(255,255,255,.5);background:rgba(255,255,255,.12);color:#fff}
+.waitlist input::placeholder{color:#BFE3CF}
+.waitlist input:focus{outline:3px solid var(--amber);background:rgba(255,255,255,.18)}
+#wl-ok{display:none;margin-top:14px;font-family:var(--mono);font-size:.85rem;color:var(--amber)}
+
+/* ---------- footer ---------- */
+footer{background:var(--green-950);color:#9DC0AE;padding:56px 0 34px;font-size:.9rem}
+.foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:32px}
+@media (max-width:860px){.foot-grid{grid-template-columns:1fr 1fr}}
+footer h4{font-family:var(--display);color:#fff;font-size:.95rem;margin-bottom:12px}
+footer a{text-decoration:none;color:#9DC0AE;display:block;padding:3px 0}
+footer a:hover{color:#fff}
+.foot-legal{border-top:1px solid rgba(255,255,255,.12);margin-top:40px;padding-top:22px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:.7rem;letter-spacing:.03em}
+
+/* ---------- reveal on scroll ---------- */
+.rv{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s ease}
+.rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  .rv{opacity:1;transform:none;transition:none}
+  html{scroll-behavior:auto}
+  #spine-dot{transition:none}
+}
+</style>
+</head>
+<body>
+
+<!-- route spine (signature) -->
+<div id="spine" aria-hidden="true"></div>
+<div id="spine-dot" aria-hidden="true"></div>
+
+<!-- ================= NAV ================= -->
+<header id="top">
+  <div class="wrap nav">
+    <a class="brand" href="#top" aria-label="Trip Planner EV home">
+      <svg class="shield" viewBox="0 0 32 34" fill="none" aria-hidden="true">
+        <path d="M16 1.5 30 6v12.5C30 26 24 31 16 32.8 8 31 2 26 2 18.5V6L16 1.5Z" fill="#0E5E44" stroke="#fff" stroke-width="2"/>
+        <path d="M17.8 8 11 18.5h4.4L14 26l7-10.5h-4.4L17.8 8Z" fill="#EFA51C"/>
+      </svg>
+      Trip Planner <b>EV</b>
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#features">Features</a>
+      <a href="#demo">Live demo</a>
+      <a href="#method">Methodology</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <a class="btn btn-green btn-sm" href="#cta">Join the waitlist</a>
+  </div>
+</header>
+
+<!-- ================= HERO ================= -->
+<section id="hero">
+  <div class="wrap">
+    <div class="hero-copy rv">
+      <p class="eyebrow">The trust layer for EV road trips</p>
+      <h1>Know it&rsquo;ll work.<br/>Know what it costs.<br/><em>Before you drive.</em></h1>
+      <p class="lede">1 in 7 public charging stops still fails. Trip Planner EV grades every charger from real session outcomes, prices every stop for your exact car, and pre-plans your backup &mdash; so charge anxiety never rides along.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-green" href="#demo">Plan a free trip
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M9 3.5 13.5 8 9 12.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+        </a>
+        <a class="btn btn-ghost" href="#method">Read the grading formula</a>
+      </div>
+      <p class="hero-foot">Free to plan &middot; <b>700+ EV models</b> &middot; No account needed &middot; No pay-to-rank, ever</p>
+    </div>
+
+    <!-- the trip ticket: your route rendered as a guide sign -->
+    <div class="rv" style="transition-delay:.12s">
+      <div class="sign" role="img" aria-label="Sample trip plan: San Francisco to Los Angeles, two graded charging stops, 94 percent confidence">
+        <span class="exit-tab">TRIP&nbsp;PLAN</span>
+        <small>Northbound &middot; I-5 corridor</small>
+        <div class="sign-route">San Francisco <span aria-hidden="true">&rarr;</span> Los Angeles
+          <span class="mono" style="font-size:.8rem;font-weight:400;color:#BFE3CF">614&nbsp;km</span>
+        </div>
+
+        <div class="stop" style="margin-top:14px">
+          <span class="grade a" aria-label="Reliability grade A">A</span>
+          <div>
+            <div class="stop-name">Kettleman City &middot; 250&nbsp;kW</div>
+            <div class="stop-meta">last good charge 38&nbsp;min ago &middot; usually free 2&ndash;4&nbsp;pm</div>
+          </div>
+          <div class="stop-cost">$11.40<br/><span style="font-size:.66rem;font-weight:400;color:#BFE3CF">18 min</span></div>
+        </div>
+
+        <div class="stop">
+          <span class="grade b" aria-label="Reliability grade B plus">B+</span>
+          <div>
+            <div class="stop-name">Tejon Ranch &middot; 150&nbsp;kW</div>
+            <div class="stop-meta">stall 3 throttles to 62&nbsp;kW &mdash; use 1, 2 or 4</div>
+          </div>
+          <div class="stop-cost">$8.90<br/><span style="font-size:.66rem;font-weight:400;color:#BFE3CF">14 min</span></div>
+        </div>
+
+        <div class="planb">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1v7M3.5 5 7 8.5 10.5 5M2 12.5h10" stroke="#EFA51C" stroke-width="1.8" stroke-linecap="round"/></svg>
+          PLAN&nbsp;B READY &middot; Buttonwillow (A&minus;) held in reserve, +9&nbsp;min
+        </div>
+
+        <div class="sign-readout">
+          <div class="readout"><b>$20.30</b><span>true cost</span></div>
+          <div class="readout"><b>6&nbsp;h&nbsp;42</b><span>door to door</span></div>
+          <div class="readout"><b>&plusmn;6%</b><span>energy band</span></div>
+          <div class="ring" style="--p:94"><i>94%</i></div>
+        </div>
+        <span class="demo-stamp">Illustration &middot; sample data</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MILE 01: THE PROBLEM ================= -->
+<section class="mile mile--tight" id="problem">
+  <span class="milemark">Mile 01 &middot; The problem</span>
+  <div class="wrap">
+    <div class="mile-head rv">
+      <p class="eyebrow">Why this exists</p>
+      <h2>Range anxiety is solved. Charge anxiety isn&rsquo;t.</h2>
+      <p class="lede">Batteries got bigger and networks got denser &mdash; yet driver satisfaction with public charging is at a multi-year low. The problem moved: it&rsquo;s no longer <i>&ldquo;will I make it?&rdquo;</i> It&rsquo;s <i>&ldquo;will the charger work, and what will it cost me?&rdquo;</i> The industry&rsquo;s own numbers:</p>
+    </div>
+    <div class="stats">
+      <div class="stat rv"><b data-count="14" data-suffix="%">0%</b><p>of public charging visits still end without a successful charge.</p><cite>J.D. Power 2025 EVX Study</cite></div>
+      <div class="stat rv" style="transition-delay:.06s"><b data-count="43" data-suffix="%">0%</b><p>of public chargers can be effectively unavailable at a given moment &mdash; broken or jammed.</p><cite>Parkopedia analysis, 2026</cite></div>
+      <div class="stat rv" style="transition-delay:.12s"><b data-count="60" data-suffix="%">0%</b><p>of failed visits trace to one cause: the charger was out of service.</p><cite>J.D. Power 2025 EVX Study</cite></div>
+      <div class="stat rv" style="transition-delay:.18s"><b>#10</b><p>where cost ranks among 10 satisfaction factors for DC fast charging &mdash; dead last.</p><cite>J.D. Power 2025 EVX Study</cite></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MILE 02: FEATURES ================= -->
+<section class="mile" id="features">
+  <span class="milemark">Mile 02 &middot; What you get</span>
+  <div class="wrap">
+    <div class="mile-head rv">
+      <p class="eyebrow">Built for the new problem</p>
+      <h2>Every stop graded, priced, and backed up.</h2>
+      <p class="lede">Other planners tell you where chargers are. Trip Planner EV tells you which ones will actually work, what they&rsquo;ll actually cost <i>your</i> car, and what to do if one lets you down.</p>
+    </div>
+    <div class="features">
+      <article class="feature rv">
+        <div class="glyph"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M11 1.5 19.5 5v6.5c0 4.6-3.6 7.9-8.5 9-4.9-1.1-8.5-4.4-8.5-9V5L11 1.5Z" stroke="currentColor" stroke-width="1.8"/><path d="M7.5 11.2 10 13.7l4.5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+        <h3>Reliability grades, A&ndash;F</h3>
+        <p>Every charger &mdash; every <i>stall</i> &mdash; graded from real session outcomes: recent successes, honest failure counts, recency decay. The formula is published. Operators can&rsquo;t buy a grade.</p>
+        <div class="chiprow"><span class="chip" style="background:var(--grade-a);color:#fff">A</span><span class="chip" style="background:var(--grade-b);color:#233A0C">B</span><span class="chip" style="background:var(--grade-c);color:#4A3202">C</span><span class="chip" style="background:var(--grade-d);color:#fff">D</span></div>
+      </article>
+      <article class="feature rv" style="transition-delay:.05s">
+        <div class="glyph"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M11 6v5l3.2 2.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+        <h3>True cost, for your car</h3>
+        <p>kWh pricing, per-minute pricing, session fees, idle fees, membership vs pay-as-you-go &mdash; normalized into one honest number per stop. &ldquo;This stop &asymp; $11.40 for you.&rdquo;</p>
+        <div class="chiprow"><span class="chip">$/kWh</span><span class="chip">$/min</span><span class="chip">idle fees</span></div>
+      </article>
+      <article class="feature rv" style="transition-delay:.1s">
+        <div class="glyph"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M2 16c3-8 6-12 9-12s6 4 9 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M2 19h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity=".4"/></svg></div>
+        <h3>A band, not a guess</h3>
+        <p>Physics-based energy modeling &mdash; speed, elevation, temperature, wind, payload &mdash; shown as a sensitivity band, not false single-number precision. You see the envelope of outcomes.</p>
+        <div class="chiprow"><span class="chip">&plusmn;6% mild</span><span class="chip">&plusmn;12% cold</span></div>
+      </article>
+      <article class="feature rv" style="transition-delay:.15s">
+        <div class="glyph"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M3 11h6l2.5-6L14 17l2.5-6H19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3>Plan B, pre-computed</h3>
+        <p>Every charging stop ships with a vetted fallback already routed. If a stall is dead or a queue forms, one tap re-routes &mdash; no roadside scramble through review threads.</p>
+        <div class="chiprow"><span class="chip">auto-swap</span><span class="chip">+min shown</span></div>
+      </article>
+      <article class="feature rv" style="transition-delay:.2s">
+        <div class="glyph"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M4 5h14M4 11h14M4 17h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+        <h3>Review digest, not review sludge</h3>
+        <p>Hundreds of driver comments condensed to what matters: &ldquo;Stalls 3&ndash;4 throttle to 62&nbsp;kW &mdash; use 1, 2 or 4. Entrance is behind the diner.&rdquo; Read in five seconds, at a glance.</p>
+        <div class="chiprow"><span class="chip">AI-condensed</span><span class="chip">source-linked</span></div>
+      </article>
+      <article class="feature rv" style="transition-delay:.25s">
+        <div class="glyph"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true"><rect x="3" y="9" width="3.4" height="9" rx="1" fill="currentColor" opacity=".35"/><rect x="9.3" y="5" width="3.4" height="13" rx="1" fill="currentColor" opacity=".65"/><rect x="15.6" y="12" width="3.4" height="6" rx="1" fill="currentColor"/></svg></div>
+        <h3>Occupancy forecast</h3>
+        <p>Chargers have rush hours too. See when a site is usually free and when it&rsquo;s packed &mdash; and let the planner time your stops around the queue, not into it.</p>
+        <div class="chiprow"><span class="chip">by hour</span><span class="chip">by weekday</span></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MILE 03: HOW IT WORKS ================= -->
+<section class="mile mile--tight" id="how">
+  <span class="milemark">Mile 03 &middot; How it works</span>
+  <div class="wrap">
+    <div class="mile-head rv">
+      <p class="eyebrow">Three exits to a plan</p>
+      <h2>From destination to graded plan in under a minute.</h2>
+    </div>
+    <div class="exits">
+      <div class="exit rv"><span class="tab">EXIT 1A</span><h3>Pick your car</h3><p>700+ EV models with real consumption profiles &mdash; or set custom battery and efficiency values. Adapters you carry count too.</p></div>
+      <div class="exit rv" style="transition-delay:.07s"><span class="tab">EXIT 1B</span><h3>Enter your route</h3><p>Start, destination, charge level. The physics model does the rest: elevation, temperature, wind, payload, your car&rsquo;s charge curve.</p></div>
+      <div class="exit rv" style="transition-delay:.14s"><span class="tab">EXIT 1C</span><h3>Drive the graded plan</h3><p>Every stop graded and priced, a Plan B in reserve, and a confidence score for the whole trip. Send it to your phone and go.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MILE 04: LIVE DEMO ================= -->
+<section class="mile" id="demo">
+  <span class="milemark">Mile 04 &middot; Try it</span>
+  <div class="wrap">
+    <div class="mile-head rv">
+      <p class="eyebrow">Interactive demo &middot; sample data</p>
+      <h2>Plan a trip right now.</h2>
+      <p class="lede">This demo runs on a small set of sample corridors and vehicles so you can feel the product. The live planner runs on OpenChargeMap, network feeds, and our session-outcome dataset.</p>
+    </div>
+    <div class="demo-grid">
+      <form class="panel rv" id="demo-form" aria-label="Trip demo controls">
+        <div class="field">
+          <label for="d-car">Your EV</label>
+          <select id="d-car"></select>
+        </div>
+        <div class="field">
+          <label for="d-route">Corridor</label>
+          <select id="d-route"></select>
+        </div>
+        <div class="field">
+          <label for="d-temp">Conditions</label>
+          <select id="d-temp">
+            <option value="mild" selected>Mild &middot; 18&deg;C</option>
+            <option value="cold">Cold &middot; &minus;4&deg;C (winter penalty)</option>
+            <option value="hot">Hot &middot; 38&deg;C (A/C load)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="d-soc">Starting charge</label>
+          <select id="d-soc">
+            <option value="100">100%</option>
+            <option value="90" selected>90%</option>
+            <option value="80">80%</option>
+            <option value="60">60%</option>
+          </select>
+        </div>
+        <button type="button" class="btn btn-green" id="d-go">Compute the plan</button>
+        <p class="mono" style="font-size:.66rem;color:var(--muted);letter-spacing:.06em">DEMO &middot; SAMPLE DATA &middot; NOT LIVE STATION STATUS
+        <!-- PRODUCTION: replace computePlan() with the routing service.
+             Geometry: Turf.js (turf.along / turf.buffer) over the route polyline;
+             stations: OpenChargeMap POI API within corridor buffer;
+             grades: session-outcome service. -->
+        </p>
+      </form>
+
+      <div class="rv" style="transition-delay:.08s">
+        <div class="sign" id="d-out" aria-live="polite">
+          <span class="exit-tab">YOUR&nbsp;PLAN</span>
+          <small id="o-corridor">Select a corridor</small>
+          <div class="sign-route" id="o-route">Trip Planner EV</div>
+          <div id="o-stops"></div>
+          <div class="planb" id="o-planb" style="display:none"></div>
+          <div class="sign-readout">
+            <div class="readout"><b id="o-cost">&mdash;</b><span>true cost</span></div>
+            <div class="readout"><b id="o-time">&mdash;</b><span>door to door</span></div>
+            <div class="readout"><b id="o-energy">&mdash;</b><span>energy used</span></div>
+            <div class="ring" id="o-ring" style="--p:0"><i id="o-conf">&mdash;</i></div>
+          </div>
+          <div class="band" aria-hidden="true">
+            <div class="band-track"><span class="band-lo" id="o-lo" style="left:20%"></span><span class="band-hi" id="o-hi" style="left:40%"></span></div>
+            <div class="band-labels"><span id="o-band">energy band: &mdash;</span><span>sensitivity to weather &amp; speed</span></div>
+          </div>
+          <span class="demo-stamp">Demo &middot; sample data</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MILE 05: METHODOLOGY ================= -->
+<section class="mile mile--green on-green" id="method">
+  <span class="milemark" style="color:rgba(255,255,255,.4)">Mile 05 &middot; Trust</span>
+  <div class="wrap">
+    <div class="mile-head rv">
+      <p class="eyebrow">Why you can trust the grade</p>
+      <h2 style="color:#fff">Read the formula. We publish it.</h2>
+      <p class="lede">Reliability scores in this industry lost drivers&rsquo; trust by being opaque and generous. Ours is the opposite: open math, honest failure counting, and no commercial thumb on the scale.</p>
+    </div>
+    <div class="formula rv" role="img" aria-label="Published grading formula">
+GRADE(stall) = f( <b>success_rate_30d</b>            &larr; recent sessions dominate
+               , <b>failure_reports</b>             &larr; counted, never smoothed away
+               , <b>recency_decay(&lambda;=0.92/day)</b>   &larr; old data fades fast
+               , <b>throughput_vs_rated_kW</b>      &larr; &ldquo;works, but slow&rdquo; costs points
+               , <b>confirmed_repairs</b> )          &larr; verified fixes restore grades
+
+No sponsorship term. No network-partnership term. None.</div>
+    <div class="pledges">
+      <div class="pledge rv"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.5 18 5v6c0 4.2-3.3 7.2-8 8.3C5.3 18.2 2 15.2 2 11V5l8-3.5Z" stroke="#EFA51C" stroke-width="1.7"/><path d="M6.7 10.2 9 12.5l4.3-4.7" stroke="#EFA51C" stroke-width="1.7" stroke-linecap="round"/></svg><p><b>No pay-to-rank. Ever.</b>Charging networks cannot pay to improve a grade, hide a failure, or feature a station. Grades are earned at the plug.</p></div>
+      <div class="pledge rv" style="transition-delay:.05s"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 10h5l2-5 3 10 2-5h2" stroke="#EFA51C" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><p><b>Failures count as failures.</b>&ldquo;Failed twice, then it worked&rdquo; is not a clean session. Our score reflects what actually happened at the stall.</p></div>
+      <div class="pledge rv" style="transition-delay:.1s"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8" stroke="#EFA51C" stroke-width="1.7"/><path d="M10 5.5V10l3 2" stroke="#EFA51C" stroke-width="1.7" stroke-linecap="round"/></svg><p><b>Fresh beats historical.</b>A charger fixed yesterday recovers quickly; one that died yesterday drops quickly. Decay is tuned for road-trip reality.</p></div>
+      <div class="pledge rv" style="transition-delay:.15s"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 16V8m6 8V4m6 12v-6" stroke="#EFA51C" stroke-width="1.7" stroke-linecap="round"/></svg><p><b>Corrections stay open.</b>Drivers and site owners can flag errors; every correction is logged publicly. Crowdsourcing made this niche &mdash; we keep it on.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MILE 06: COMPARISON ================= -->
+<section class="mile" id="compare">
+  <span class="milemark">Mile 06 &middot; Compared</span>
+  <div class="wrap">
+    <div class="mile-head rv">
+      <p class="eyebrow">An honest comparison</p>
+      <h2>Great tools exist. They each solve half the trip.</h2>
+      <p class="lede">Route planners route. Community maps review. Payment apps pay. Nobody unifies working-charger confidence with true cost &mdash; that seam is where Trip Planner EV lives.</p>
+    </div>
+    <div class="tablewrap rv">
+      <table>
+        <thead><tr>
+          <th scope="col">Capability</th>
+          <th scope="col" class="us">Trip Planner EV<br/><span class="mono" style="font-size:.66rem;font-weight:400">early access</span></th>
+          <th scope="col">ABRP</th>
+          <th scope="col">PlugShare</th>
+          <th scope="col">ChargeHub</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>Stall-level reliability grade, published formula</td><td class="us yes">&#10003;</td><td class="no">&mdash;</td><td class="part">score, opaque</td><td class="no">&mdash;</td></tr>
+          <tr><td>True cost per stop, normalized for your car</td><td class="us yes">&#10003;</td><td class="part">partial</td><td class="no">&mdash;</td><td class="part">free/paid flag</td></tr>
+          <tr><td>Physics range model with sensitivity band</td><td class="us yes">&#10003;</td><td class="part">point estimate</td><td class="no">&mdash;</td><td class="no">&mdash;</td></tr>
+          <tr><td>Backup charger pre-planned per stop</td><td class="us yes">&#10003;</td><td class="part">auto-swap live</td><td class="no">&mdash;</td><td class="no">&mdash;</td></tr>
+          <tr><td>Occupancy forecast by hour</td><td class="us yes">&#10003;</td><td class="no">&mdash;</td><td class="part">live only</td><td class="part">live only</td></tr>
+          <tr><td>Accurate without an OBD dongle</td><td class="us yes">&#10003;</td><td class="part">best with dongle</td><td class="no">n/a</td><td class="no">n/a</td></tr>
+          <tr><td>Community reviews &amp; check-ins</td><td class="us part">launching</td><td class="part">basic</td><td class="yes">&#10003; best</td><td class="part">smaller</td></tr>
+          <tr><td>In-app charging payment</td><td class="us no">roadmap</td><td class="no">&mdash;</td><td class="part">clunky</td><td class="yes">&#10003; Passport</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="tfoot rv">Feature comparison as of July 2026, from public product pages and app listings. Competitors ship updates often &mdash; verify current capabilities before relying on this commercially.</p>
+  </div>
+</section>
+
+<!-- ================= MILE 07: PRICING ================= -->
+<section class="mile mile--tight" id="pricing">
+  <span class="milemark">Mile 07 &middot; Pricing</span>
+  <div class="wrap">
+    <div class="mile-head rv">
+      <p class="eyebrow">Simple pricing</p>
+      <h2>Planning is free. The car seat costs a coffee.</h2>
+    </div>
+    <div class="plans">
+      <div class="plan rv">
+        <h3>Free</h3>
+        <div class="price">$0<span> / forever</span></div>
+        <p style="color:var(--muted);font-size:.93rem">Everything you need to plan with confidence.</p>
+        <ul>
+          <li>Unlimited trip plans, 700+ EV models</li>
+          <li>Reliability grades &amp; review digests</li>
+          <li>True-cost estimates per stop</li>
+          <li>Sensitivity band &amp; confidence score</li>
+          <li>Send plan to your phone</li>
+        </ul>
+        <a class="btn btn-ghost" href="#demo">Start planning</a>
+      </div>
+      <div class="plan hot rv" style="transition-delay:.06s">
+        <span class="badge">FOUNDING PRICE</span>
+        <h3>Premium</h3>
+        <div class="price">$4.99<span> / month &middot; or $49 / year</span></div>
+        <p style="color:var(--muted);font-size:.93rem">The plan that rides with you.</p>
+        <ul>
+          <li>CarPlay &amp; Android Auto navigation</li>
+          <li>Live re-routing &amp; one-tap Plan B swap</li>
+          <li>Live weather &amp; traffic in the energy model</li>
+          <li>Price alerts (&ldquo;30% cheaper 2 exits ahead&rdquo;)</li>
+          <li>Vehicle telematics &mdash; live state of charge, no dongle</li>
+          <li>Occupancy-timed departure suggestions</li>
+        </ul>
+        <a class="btn btn-green" href="#cta">Join the waitlist</a>
+      </div>
+      <div class="plan rv" style="transition-delay:.12s">
+        <h3>Business &amp; API</h3>
+        <div class="price">Custom</div>
+        <p style="color:var(--muted);font-size:.93rem">The trust layer, in your product.</p>
+        <ul>
+          <li>Reliability &amp; true-cost data API</li>
+          <li>Embeddable planner widget, white-label</li>
+          <li>Fleet routing with cost &amp; CO&#8322; reporting</li>
+          <li>Uptime insights for networks &amp; agencies</li>
+        </ul>
+        <a class="btn btn-ghost" href="mailto:hello@tripplannerev.com">Talk to us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section class="mile mile--tight" id="faq">
+  <span class="milemark">Rest area &middot; FAQ</span>
+  <div class="wrap">
+    <div class="mile-head rv">
+      <p class="eyebrow">Questions, answered plainly</p>
+      <h2>Before you ask.</h2>
+    </div>
+    <div class="faq">
+      <details class="rv"><summary>How are the A&ndash;F grades calculated?</summary><p>From real session outcomes at the stall level: recent successful charges, honestly-counted failures, delivered power versus rated power, and verified repairs &mdash; with a recency decay so yesterday matters far more than last year. The formula is published on this page and versioned when it changes. Networks cannot pay to alter a grade.</p></details>
+      <details class="rv"><summary>Is it accurate without an OBD dongle?</summary><p>Yes. The energy model is physics-based (speed, elevation, temperature, wind, payload, your car&rsquo;s charge curve) and we show a sensitivity band instead of a single false-precision number. Where your car supports telematics, Premium reads live state of charge directly &mdash; no hardware.</p></details>
+      <details class="rv"><summary>Which cars are supported?</summary><p>700+ EV models at launch across Tesla, Hyundai, Kia, Ford, VW, BMW, Rivian, BYD and more &mdash; plus fully custom values (battery kWh, consumption, reserve) for anything we&rsquo;ve missed. Adapters you carry, like NACS or CCS adapters, are part of your profile so the map matches what you can actually plug into.</p></details>
+      <details class="rv"><summary>Where does the data come from?</summary><p>Station locations start from OpenChargeMap and OpenStreetMap (with attribution), enriched with network feeds where available. Grades, cost normalization, occupancy patterns and review digests are our own layer, built from session outcomes and driver check-ins.</p></details>
+      <details class="rv"><summary>Is the free plan actually free?</summary><p>Yes &mdash; planning, grades, and cost estimates stay free. Premium exists for the in-car experience and live data, because that&rsquo;s genuinely costly to run. No ads inside trip plans, and no selling your location history.</p></details>
+      <details class="rv"><summary>When does the in-car app arrive?</summary><p>The web planner is first; CarPlay and Android Auto follow for Premium members, with waitlist members getting access in order. Founding-price members keep the $49/year rate.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FINAL CTA ================= -->
+<section class="mile mile--deep" id="cta">
+  <div class="wrap">
+    <div class="cta-sign rv">
+      <div class="sign">
+        <span class="exit-tab">NEXT&nbsp;EXIT</span>
+        <small>Founding members &middot; early access</small>
+        <div class="sign-route" style="font-size:clamp(1.5rem,3.4vw,2.1rem)">Charge anxiety ends here <span aria-hidden="true">&nbsp;&rarr;</span></div>
+        <p style="color:#CFE4D8;font-size:.96rem;margin-top:10px">Join the waitlist for early access to the planner, the founding $49/year Premium rate, and a say in which corridors we grade first.</p>
+        <form class="waitlist" id="wl-form" aria-label="Join the waitlist">
+          <input type="email" id="wl-email" placeholder="you@example.com" required aria-label="Email address" />
+          <button class="btn btn-reflect" type="submit">Join the waitlist</button>
+        </form>
+        <p id="wl-ok" role="status">&#10003; You&rsquo;re on the list &mdash; watch your inbox for corridor voting.</p>
+        <!-- PRODUCTION: POST the email to your backend / form provider here. -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <a class="brand" href="#top" style="color:#fff;margin-bottom:12px">
+          <svg class="shield" viewBox="0 0 32 34" fill="none" aria-hidden="true"><path d="M16 1.5 30 6v12.5C30 26 24 31 16 32.8 8 31 2 26 2 18.5V6L16 1.5Z" fill="#0E5E44" stroke="#fff" stroke-width="2"/><path d="M17.8 8 11 18.5h4.4L14 26l7-10.5h-4.4L17.8 8Z" fill="#EFA51C"/></svg>
+          Trip Planner <b style="color:#EFA51C">EV</b>
+        </a>
+        <p style="max-width:34ch;font-size:.88rem">The trust layer for EV road trips. Grades earned at the plug &mdash; never sold.</p>
+      </div>
+      <div><h4>Product</h4><a href="#features">Features</a><a href="#demo">Live demo</a><a href="#pricing">Pricing</a><a href="#method">Methodology</a></div>
+      <div><h4>Company</h4><a href="#faq">FAQ</a><a href="mailto:hello@tripplannerev.com">Contact</a><a href="#cta">Waitlist</a></div>
+      <div><h4>Data &amp; legal</h4><a href="https://openchargemap.org" rel="noopener">OpenChargeMap</a><a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap &copy; contributors</a><a href="#">Privacy policy</a><a href="#">Terms</a></div>
+    </div>
+    <div class="foot-legal">
+      <span>&copy; 2026 Trip Planner EV. Station data &copy; OpenChargeMap &amp; OpenStreetMap contributors (ODbL).</span>
+      <span>No fake reviews. No pay-to-rank. Grades are earned.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* =====================================================
+   Trip Planner EV — front-end behaviors
+   PRODUCTION NOTES:
+   - computePlan(): swap for the routing service. Real geometry
+     via Turf.js (buffer the route polyline, query OpenChargeMap
+     POIs inside it, order with turf.along). Grades/cost from the
+     session-outcome + tariff services.
+   - Waitlist submit: POST to your backend or form provider.
+   ===================================================== */
+(function(){
+  "use strict";
+
+  /* ---------- sticky nav ---------- */
+  var header = document.querySelector('header');
+  var onScrollNav = function(){ header.classList.toggle('scrolled', window.scrollY > 8); };
+  window.addEventListener('scroll', onScrollNav, {passive:true}); onScrollNav();
+
+  /* ---------- route-spine progress dot ---------- */
+  var dot = document.getElementById('spine-dot');
+  if (dot){
+    var onScrollDot = function(){
+      var h = document.documentElement;
+      var p = h.scrollTop / (h.scrollHeight - h.clientHeight || 1);
+      dot.style.top = (12 + p * (window.innerHeight - 40)) + 'px';
+    };
+    window.addEventListener('scroll', onScrollDot, {passive:true}); onScrollDot();
+  }
+
+  /* ---------- reveal on scroll ---------- */
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }});
+  }, {threshold:.12});
+  document.querySelectorAll('.rv').forEach(function(el){ io.observe(el); });
+
+  /* ---------- stat count-up ---------- */
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var cio = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting) return;
+      var el = e.target, end = +el.dataset.count, suf = el.dataset.suffix || '';
+      cio.unobserve(el);
+      if (reduce){ el.textContent = end + suf; return; }
+      var t0 = null;
+      var step = function(t){
+        if(!t0) t0 = t;
+        var k = Math.min((t - t0)/900, 1);
+        el.textContent = Math.round(end * (1 - Math.pow(1-k,3))) + suf;
+        if(k < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    });
+  }, {threshold:.6});
+  document.querySelectorAll('[data-count]').forEach(function(el){ cio.observe(el); });
+
+  /* ---------- demo: sample dataset (clearly labeled) ---------- */
+  var CARS = [
+    {name:'Tesla Model 3 Long Range', batt:75,  eff:145},
+    {name:'Hyundai Ioniq 5 (77 kWh)', batt:77,  eff:175},
+    {name:'Kia EV6 Long Range',       batt:77,  eff:170},
+    {name:'Ford Mustang Mach-E ER',   batt:88,  eff:188},
+    {name:'VW ID.4 Pro',              batt:77,  eff:182},
+    {name:'Rivian R1T',               batt:135, eff:240},
+    {name:'BYD Seal AWD',             batt:82,  eff:168}
+  ];
+  var ROUTES = [
+    {name:'San Francisco → Los Angeles', tag:'I-5 corridor', km:614, drive:5.9, rate:.52,
+     stops:[{n:'Kettleman City · 250 kW', g:'A',  note:'last good charge 38 min ago · usually free 2–4 pm'},
+            {n:'Tejon Ranch · 150 kW',    g:'B+', note:'stall 3 throttles to 62 kW — use 1, 2 or 4'}],
+     planb:'Buttonwillow (A−) held in reserve, +9 min'},
+    {name:'London → Edinburgh', tag:'A1 / M6 corridor', km:650, drive:6.8, rate:.62,
+     stops:[{n:'Wetherby Services · 350 kW', g:'A',  note:'12 stalls · queue rare before 4 pm'},
+            {n:'Abington · 150 kW',          g:'B',  note:'2 of 6 stalls capped at 90 kW this week'}],
+     planb:'Gretna Green (A) held in reserve, +6 min'},
+    {name:'Berlin → Munich', tag:'A9 corridor', km:585, drive:5.7, rate:.58,
+     stops:[{n:'Leipzig Süd · 300 kW',        g:'A',  note:'reliable · café on site'},
+            {n:'Nürnberg-Feucht · 150 kW',    g:'B+', note:'busy 5–7 pm · time your stop earlier'}],
+     planb:'Ingolstadt Nord (A−) held in reserve, +7 min'},
+    {name:'Toronto → Montréal', tag:'Hwy 401 corridor', km:541, drive:5.4, rate:.44,
+     stops:[{n:'Kingston · 180 kW',  g:'A−', note:'winter queue common on Fridays'},
+            {n:'Cornwall · 100 kW',  g:'C+', note:'1 of 2 stalls flaky — Plan B recommended'}],
+     planb:'Brockville (B+) held in reserve, +11 min'}
+  ];
+  var TEMP = {mild:{k:1.0, band:6}, cold:{k:1.22, band:12}, hot:{k:1.10, band:9}};
+  var GRADEPTS = {'A':97,'A−':94,'B+':90,'B':86,'C+':78,'C':72};
+
+  var $ = function(id){ return document.getElementById(id); };
+  var selCar = $('d-car'), selRoute = $('d-route');
+  CARS.forEach(function(c,i){ selCar.add(new Option(c.name, i)); });
+  ROUTES.forEach(function(r,i){ selRoute.add(new Option(r.name, i)); });
+
+  function gradeClass(g){ return g.charAt(0).toLowerCase(); }
+
+  function computePlan(){
+    var car = CARS[+selCar.value];
+    var rt  = ROUTES[+selRoute.value];
+    var tc  = TEMP[$('d-temp').value];
+    var soc = +$('d-soc').value;
+
+    var energy = rt.km * car.eff / 1000 * tc.k;              // kWh needed
+    var startKwh = car.batt * soc / 100 * 0.9;               // usable at start
+    var chargeKwh = Math.max(0, energy - startKwh + car.batt * .12); // arrive ~12% buffer
+    var cost = chargeKwh * rt.rate + rt.stops.length * 0.9;  // + session fees
+    var chargeMin = rt.stops.length ? Math.round(chargeKwh / rt.stops.length / 2.1) * rt.stops.length : 0;
+    var totalH = rt.drive + chargeMin/60;
+
+    var conf = Math.round(rt.stops.reduce(function(s,x){ return s + (GRADEPTS[x.g]||80); },0) / rt.stops.length
+               - (tc.band - 6) * 0.7);
+    conf = Math.max(62, Math.min(98, conf));
+
+    /* render */
+    $('o-corridor').textContent = rt.tag + ' · ' + car.name;
+    $('o-route').innerHTML = rt.name.replace('→','<span aria-hidden="true">→</span>') +
+      ' <span class="mono" style="font-size:.8rem;font-weight:400;color:#BFE3CF">' + rt.km + ' km</span>';
+
+    var stopsHtml = rt.stops.map(function(s,i){
+      var perStop = (cost - rt.stops.length*0.9) / rt.stops.length + 0.9;
+      return '<div class="stop"'+(i===0?' style="margin-top:14px"':'')+'>' +
+        '<span class="grade '+gradeClass(s.g)+'" aria-label="Reliability grade '+s.g+'">'+s.g+'</span>' +
+        '<div><div class="stop-name">'+s.n+'</div><div class="stop-meta">'+s.note+'</div></div>' +
+        '<div class="stop-cost">$'+perStop.toFixed(2)+'<br/><span style="font-size:.66rem;font-weight:400;color:#BFE3CF">'+Math.round(chargeMin/rt.stops.length)+' min</span></div></div>';
+    }).join('');
+    $('o-stops').innerHTML = chargeKwh < 1
+      ? '<div class="stop" style="margin-top:14px"><span class="grade a">✓</span><div><div class="stop-name">No charging stop needed</div><div class="stop-meta">arrives with ~'+Math.round((startKwh-energy)/car.batt*100+10)+'% remaining</div></div><div></div></div>'
+      : stopsHtml;
+
+    var pb = $('o-planb');
+    if (chargeKwh >= 1){ pb.style.display='flex';
+      pb.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1v7M3.5 5 7 8.5 10.5 5M2 12.5h10" stroke="#EFA51C" stroke-width="1.8" stroke-linecap="round"/></svg>PLAN B READY · ' + rt.planb;
+    } else { pb.style.display='none'; }
+
+    $('o-cost').textContent   = chargeKwh < 1 ? '$0.00' : '$' + cost.toFixed(2);
+    $('o-time').textContent   = Math.floor(totalH) + ' h ' + String(Math.round(totalH%1*60)).padStart(2,'0');
+    $('o-energy').textContent = Math.round(energy) + ' kWh';
+    $('o-band').textContent   = 'energy band: ' + Math.round(energy*(1-tc.band/100)) + '–' + Math.round(energy*(1+tc.band/100)) + ' kWh (±' + tc.band + '%)';
+    var mid = 30 + (tc.k-1)*120;
+    $('o-lo').style.left = Math.max(2, mid - tc.band*1.6) + '%';
+    $('o-hi').style.left = Math.min(96, mid + tc.band*1.6) + '%';
+    $('o-conf').textContent = conf + '%';
+    $('o-ring').style.setProperty('--p', conf);
+  }
+  $('d-go').addEventListener('click', computePlan);
+  computePlan(); /* initial render */
+
+  /* ---------- waitlist (front-end stub) ---------- */
+  $('wl-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    var email = $('wl-email').value.trim();
+    if(!email) return;
+    /* PRODUCTION: fetch('/api/waitlist', {method:'POST', body: JSON.stringify({email})}) */
+    $('wl-ok').style.display = 'block';
+    $('wl-email').value = '';
+  });
+})();
+</script>
+</body>
+</html>
