@@ -25,23 +25,24 @@ export default function Footer({ onNavigate }) {
           </div>
           <div>
             <h4>Product</h4>
-            <a href="#features">Features</a>
-            <a href="#demo">Live demo</a>
-            <a href="#pricing">Pricing</a>
-            <a href="#method">Methodology</a>
+            <a href="#features" onClick={(e) => { e.preventDefault(); onNavigate('landing'); setTimeout(() => window.location.hash = 'features', 100); }}>Features</a>
+            <a href="#demo" onClick={(e) => { e.preventDefault(); onNavigate('landing'); setTimeout(() => window.location.hash = 'demo', 100); }}>Live demo</a>
+            <a href="#pricing" onClick={(e) => { e.preventDefault(); onNavigate('pricing'); }}>Pricing</a>
+            <a href="#method" onClick={(e) => { e.preventDefault(); onNavigate('methodology'); }}>Methodology</a>
           </div>
           <div>
             <h4>Company</h4>
-            <a href="#faq">FAQ</a>
-            <a href="mailto:hello@tripplannerev.com">Contact</a>
-            <a href="#cta">Waitlist</a>
+            <a href="#about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }}>About Us</a>
+            <a href="#faq" onClick={(e) => { e.preventDefault(); onNavigate('landing'); setTimeout(() => window.location.hash = 'faq', 100); }}>FAQ</a>
+            <a href="#changelog" onClick={(e) => { e.preventDefault(); onNavigate('changelog'); }}>Changelog</a>
+            <a href="#contact" onClick={(e) => { e.preventDefault(); onNavigate('contact'); }}>Contact</a>
           </div>
           <div>
             <h4>Data &amp; legal</h4>
             <a href="https://openchargemap.org" rel="noopener noreferrer" target="_blank">OpenChargeMap</a>
             <a href="https://www.openstreetmap.org/copyright" rel="noopener noreferrer" target="_blank">OpenStreetMap &copy; contributors</a>
-            <a href="#privacy" onClick={(e) => { e.preventDefault(); alert("Mock Privacy Policy: We keep your trip data private and never sell location coordinates."); }}>Privacy policy</a>
-            <a href="#terms" onClick={(e) => { e.preventDefault(); alert("Mock Terms: Estimates are physics-based models; verified charging states depend on real-world conditions."); }}>Terms</a>
+            <a href="#privacy" onClick={(e) => { e.preventDefault(); onNavigate('legal'); }}>Privacy Policy</a>
+            <a href="#terms" onClick={(e) => { e.preventDefault(); onNavigate('legal'); }}>Terms of Service</a>
           </div>
         </div>
         <div className="foot-legal">

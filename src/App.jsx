@@ -2,7 +2,6 @@ import React, { useContext, useState, useEffect } from 'react';
 import { AppProvider, AppContext } from './context/AppContext';
 import Nav from './components/Nav';
 import Hero from './components/Hero';
-import InteractiveDemo from './components/InteractiveDemo';
 import MarketingPage from './components/MarketingPage';
 import PlannerDashboard from './components/PlannerDashboard';
 import VehiclePicker from './components/VehiclePicker';
@@ -10,6 +9,15 @@ import StripeCheckout from './components/StripeCheckout';
 import CarPlayPreview from './components/CarPlayPreview';
 import AdminPanel from './components/AdminPanel';
 import Footer from './components/Footer';
+import AboutPage from './components/AboutPage';
+import PricingPage from './components/PricingPage';
+import MethodologyPage from './components/MethodologyPage';
+import BlogPage from './components/BlogPage';
+import ContactPage from './components/ContactPage';
+import LegalPage from './components/LegalPage';
+import ChangelogPage from './components/ChangelogPage';
+import RangeCalculator from './components/RangeCalculator';
+import CompareCars from './components/CompareCars';
 
 function AppContent() {
   const { user, logout } = useContext(AppContext);
@@ -173,6 +181,97 @@ function AppContent() {
             {appTab === 'admin' && <AdminPanel />}
           </main>
         </div>
+      </div>
+    );
+  }
+
+  // Routing switch for informational subpages
+  if (view === 'about') {
+    return (
+      <div className="marketing-view">
+        <Nav view={view} onNavigate={handleNavigate} />
+        <AboutPage onNavigate={handleNavigate} />
+        <Footer onNavigate={handleNavigate} />
+      </div>
+    );
+  }
+
+  if (view === 'pricing') {
+    return (
+      <div className="marketing-view">
+        <Nav view={view} onNavigate={handleNavigate} />
+        <PricingPage onNavigate={handleNavigate} />
+        <Footer onNavigate={handleNavigate} />
+      </div>
+    );
+  }
+
+  if (view === 'methodology') {
+    return (
+      <div className="marketing-view">
+        <Nav view={view} onNavigate={handleNavigate} />
+        <MethodologyPage />
+        <Footer onNavigate={handleNavigate} />
+      </div>
+    );
+  }
+
+  if (view === 'blog') {
+    return (
+      <div className="marketing-view">
+        <Nav view={view} onNavigate={handleNavigate} />
+        <BlogPage />
+        <Footer onNavigate={handleNavigate} />
+      </div>
+    );
+  }
+
+  if (view === 'contact') {
+    return (
+      <div className="marketing-view">
+        <Nav view={view} onNavigate={handleNavigate} />
+        <ContactPage />
+        <Footer onNavigate={handleNavigate} />
+      </div>
+    );
+  }
+
+  if (view === 'legal') {
+    return (
+      <div className="marketing-view">
+        <Nav view={view} onNavigate={handleNavigate} />
+        <LegalPage />
+        <Footer onNavigate={handleNavigate} />
+      </div>
+    );
+  }
+
+  if (view === 'changelog') {
+    return (
+      <div className="marketing-view">
+        <Nav view={view} onNavigate={handleNavigate} />
+        <ChangelogPage />
+        <Footer onNavigate={handleNavigate} />
+      </div>
+    );
+  }
+
+  if (view === 'range-calc') {
+    return (
+      <div className="marketing-view">
+        <Nav view={view} onNavigate={handleNavigate} />
+        <RangeCalculator onNavigate={handleNavigate} />
+        <Footer onNavigate={handleNavigate} />
+      </div>
+    );
+  }
+
+  if (view === 'compare-cars') {
+    return (
+      <div className="marketing-view">
+        <Nav view={view} onNavigate={handleNavigate} />
+        <CompareCars />
+        <Footer onNavigate={handleNavigate} />
       </div>
     );
   }

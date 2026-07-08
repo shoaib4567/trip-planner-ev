@@ -32,54 +32,75 @@ export default function Nav({ view, onNavigate }) {
           Trip Planner <b>EV</b>
         </a>
 
-        {view === 'landing' ? (
-          <>
-            <nav className="nav-links" aria-label="Primary">
-              <a href="#features">Features</a>
-              <a href="#demo">Live demo</a>
-              <a href="#method">Methodology</a>
-              <a href="#pricing">Pricing</a>
-              <a href="#faq">FAQ</a>
-            </nav>
-            <div style={{ display: 'flex', gap: '12px', marginLeft: 'auto', alignItems: 'center' }}>
-              {user ? (
-                <button 
-                  onClick={() => onNavigate('app')} 
-                  className="btn btn-green btn-sm"
-                >
-                  Planner App
-                </button>
-              ) : (
-                <>
-                  <button 
-                    onClick={() => onNavigate('auth')} 
-                    className="btn btn-ghost btn-sm"
-                  >
-                    Sign In
-                  </button>
-                  <a className="btn btn-green btn-sm" href="#cta">Join the waitlist</a>
-                </>
-              )}
-            </div>
-          </>
-        ) : (
-          <div style={{ display: 'flex', gap: '16px', marginLeft: 'auto', alignItems: 'center' }}>
+        <nav className="nav-links" aria-label="Primary">
+          <a 
+            href="#about"
+            onClick={(e) => { e.preventDefault(); onNavigate('about'); }}
+            style={{ color: view === 'about' ? 'var(--green)' : '' }}
+          >
+            About
+          </a>
+          <a 
+            href="#methodology"
+            onClick={(e) => { e.preventDefault(); onNavigate('methodology'); }}
+            style={{ color: view === 'methodology' ? 'var(--green)' : '' }}
+          >
+            Methodology
+          </a>
+          <a 
+            href="#pricing"
+            onClick={(e) => { e.preventDefault(); onNavigate('pricing'); }}
+            style={{ color: view === 'pricing' ? 'var(--green)' : '' }}
+          >
+            Pricing
+          </a>
+          <a 
+            href="#blog"
+            onClick={(e) => { e.preventDefault(); onNavigate('blog'); }}
+            style={{ color: view === 'blog' ? 'var(--green)' : '' }}
+          >
+            Blog
+          </a>
+          <a 
+            href="#range-calc"
+            onClick={(e) => { e.preventDefault(); onNavigate('range-calc'); }}
+            style={{ color: view === 'range-calc' ? 'var(--green)' : '' }}
+          >
+            Range Calculator
+          </a>
+          <a 
+            href="#compare"
+            onClick={(e) => { e.preventDefault(); onNavigate('compare-cars'); }}
+            style={{ color: view === 'compare-cars' ? 'var(--green)' : '' }}
+          >
+            Compare EVs
+          </a>
+        </nav>
+
+        <div style={{ display: 'flex', gap: '12px', marginLeft: 'auto', alignItems: 'center' }}>
+          {user ? (
             <button 
-              onClick={() => onNavigate('landing')} 
-              className="btn btn-ghost btn-sm"
+              onClick={() => onNavigate('app')} 
+              className="btn btn-green btn-sm"
             >
-              ← Marketing Page
+              Planner App
             </button>
-            {view !== 'app' && user && (
+          ) : (
+            <>
               <button 
-                onClick={() => onNavigate('app')} 
-                className="btn btn-green btn-sm"
+                onClick={() => onNavigate('auth')} 
+                className="btn btn-ghost btn-sm"
               >
-                Go to App
+                Sign In
               </button>
-            )}
-          </div>
-        )}
+              {view === 'landing' ? (
+                <a className="btn btn-green btn-sm" href="#cta">Join the waitlist</a>
+              ) : (
+                <button onClick={() => onNavigate('landing')} className="btn btn-green btn-sm">Join Waitlist</button>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </header>
   );

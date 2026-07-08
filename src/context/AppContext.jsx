@@ -167,6 +167,50 @@ export const AppProvider = ({ children }) => {
     setCorrectionsQueue(correctionsQueue.map(c => c.id === id ? { ...c, status: 'resolved' } : c));
   };
 
+  // Mock Notifications
+  const [notifications, setNotifications] = useState([
+    { id: 1, type: 'grade-drop', message: '⚠️ Kettleman City stall 3 throttled to 62 kW (grade B+).', date: 'Just now', read: false },
+    { id: 2, type: 'weather', message: '🌬️ High winds (14 km/h headwind) warning along I-5 route.', date: '10 mins ago', read: false },
+    { id: 3, type: 'cost', message: '💵 Harris Ranch station fee changed to $1.50.', date: '1 hour ago', read: true }
+  ]);
+
+  const dismissNotification = (id) => {
+    setNotifications(notifications.filter(n => n.id !== id));
+  };
+
+  const markAllNotificationsRead = () => {
+    setNotifications(notifications.map(n => ({ ...n, read: true })));
+  };
+
+  // Telematics State
+  const [telematics, setTelematics] = useState({
+    connected: false,
+    vin: '5YJ3E1EA5LF******',
+    lastSync: null,
+    odometer: 42100,
+    health: 94
+  });
+
+  const connectTelematics = (vin = '5YJ3E1EA5LF******') => {
+    setTelematics({
+      connected: true,
+      vin,
+      lastSync: new Date().toLocaleTimeString(),
+      odometer: 42100,
+      health: 94
+    });
+  };
+
+  const disconnectTelematics = () => {
+    setTelematics({
+      connected: false,
+      vin: '5YJ3E1EA5LF******',
+      lastSync: null,
+      odometer: 42100,
+      health: 94
+    });
+  };
+
   return (
     <AppContext.Provider value={{
       user,
@@ -176,6 +220,8 @@ export const AppProvider = ({ children }) => {
       savedTrips,
       waitlistEmails,
       correctionsQueue,
+      notifications,
+      telematics,
       login,
       signup,
       logout,
@@ -188,7 +234,11 @@ export const AppProvider = ({ children }) => {
       deleteTrip,
       addWaitlistEmail,
       addCorrection,
-      resolveCorrection
+      resolveCorrection,
+      dismissNotification,
+      markAllNotificationsRead,
+      connectTelematics,
+      disconnectTelematics
     }}>
       {children}
     </AppContext.Provider>

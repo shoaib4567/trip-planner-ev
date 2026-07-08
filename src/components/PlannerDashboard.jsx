@@ -41,14 +41,23 @@ const TEMP = {
 const GRADEPTS = { 'A': 97, 'A−': 94, 'B+': 90, 'B': 86, 'C+': 78, 'C': 72 };
 
 export default function PlannerDashboard() {
-  const { selectedVehicle, user, saveTrip, addCorrection } = useContext(AppContext);
+  const { 
+    selectedVehicle, 
+    user, 
+    saveTrip, 
+    addCorrection, 
+    notifications, 
+    dismissNotification,
+    telematics,
+    connectTelematics,
+    disconnectTelematics
+  } = useContext(AppContext);
   const [routeIdx, setRouteIdx] = useState(0);
   const [tempKey, setTempKey] = useState('mild');
   const [soc, setSoc] = useState(90);
   
   // Premium Modifiers
   const [liveWeather, setLiveWeather] = useState(false);
-  const [telematicsActive, setTelematicsActive] = useState(false);
   
   // States
   const [savedSuccess, setSavedSuccess] = useState(false);
@@ -78,10 +87,10 @@ export default function PlannerDashboard() {
 
   // Auto SOC Simulation
   useEffect(() => {
-    if (telematicsActive && user?.plan === 'Premium') {
+    if (telematics.connected && user?.plan === 'Premium') {
       setSoc(74); // Mock connected vehicle state of charge
     }
-  }, [telematicsActive, user]);
+  }, [telematics.connected, user]);
 
   const runCalculation = () => {
     const car = selectedVehicle;
@@ -176,6 +185,18 @@ export default function PlannerDashboard() {
       <h2 style={{ marginBottom: '8px', fontSize: '1.8rem' }}>Trip Planner</h2>
       <p className="lede" style={{ marginBottom: '24px' }}>Plan your route with graded highway chargers, weather envelopes, and Plan B backups.</p>
 
+      {/* Live Alerts */}
+      {notifications && notifications.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
+          {notifications.map(n => (
+            <div key={n.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#FFF5F5', borderLeft: '4px solid var(--grade-d)', padding: '10px 16px', borderRadius: '4px', fontSize: '.9rem', boxShadow: 'var(--shadow-card)', border: '1px solid var(--line)', borderLeftWidth: '4px' }}>
+              <span style={{ color: 'var(--ink)' }}>{n.message}</span>
+              <button onClick={() => dismissNotification(n.id)} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem' }}>✕</button>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="demo-grid">
         <div style={{ display: 'grid', gap: '16px' }}>
           <form className="panel" onSubmit={(e) => e.preventDefault()} aria-label="Trip planner controls">
@@ -214,10 +235,10 @@ export default function PlannerDashboard() {
                 min="20" 
                 max="100" 
                 step="5"
-                disabled={telematicsActive && isPremium}
+                disabled={telematics.connected && isPremium}
                 value={soc} 
                 onChange={(e) => setSoc(Number(e.target.value))} 
-                style={{ width: '100%', height: '8px', cursor: (telematicsActive && isPremium) ? 'not-allowed' : 'pointer' }}
+                style={{ width: '100%', height: '8px', cursor: (telematics.connected && isPremium) ? 'not-allowed' : 'pointer' }}
               />
             </div>
             
@@ -244,16 +265,22 @@ export default function PlannerDashboard() {
                   <input 
                     type="checkbox" 
                     disabled={!isPremium}
-                    checked={telematicsActive}
-                    onChange={(e) => setTelematicsActive(e.target.checked)}
+                    checked={telematics.connected}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        connectTelematics();
+                      } else {
+                        disconnectTelematics();
+                      }
+                    }}
                   />
                   Smartcar Telematics (Lock Live SoC to connected vehicle)
                 </label>
               </div>
 
-              {telematicsActive && isPremium && (
+              {telematics.connected && isPremium && (
                 <div style={{ fontSize: '.72rem', fontFamily: 'var(--mono)', color: 'var(--green-950)' }}>
-                  ● Smartcar telemetry connected. SOC fetched dynamically (74%).
+                  ● Smartcar telemetry connected (VIN: {telematics.vin}). SOC fetched dynamically (74%).
                 </div>
               )}
 
